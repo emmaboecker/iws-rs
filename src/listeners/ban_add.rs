@@ -12,6 +12,16 @@ pub async fn ban_add(
     client: &Client,
     collections: &IWSCollections,
 ) -> eyre::Result<()> {
+    let ban = client
+        .ban(ban_add.guild_id, ban_add.user.id)
+        .await?
+        .model()
+        .await?;
+
+    if ban.user.bot {
+        return Ok(());
+    }
+
     let guild_settings = collections
         .bot_settings
         .find_one(doc! { "_id": ban_add.guild_id.to_string() }, None)
@@ -30,12 +40,6 @@ pub async fn ban_add(
     let existing_report = collections
         .reported_users
         .find_one(doc! { "_id": ban_add.user.id.to_string() }, None)
-        .await?;
-
-    let ban = client
-        .ban(ban_add.guild_id, ban_add.user.id)
-        .await?
-        .model()
         .await?;
 
     let reason = ban.reason;

@@ -44,8 +44,6 @@ pub async fn report(
         return Ok(());
     }
 
-    // val doc = Database.bannedUserCollection.findOneById(arguments.user.id)
-
     let existing_report = ctx
         .data
         .reported_users

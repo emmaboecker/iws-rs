@@ -39,7 +39,7 @@ async fn scan_guild(
     let member = http_client.guild_member(guild.id, user).await;
 
     if let Err(e) = member {
-        if e.to_string().contains("403") {
+        if e.to_string().contains("404") {
             return Ok(());
         } else {
             return Err(e.into());

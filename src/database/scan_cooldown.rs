@@ -1,3 +1,4 @@
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use twilight_model::id::Id;
 use zephyrus::twilight_exports::GuildMarker;
@@ -7,5 +8,5 @@ use zephyrus::twilight_exports::GuildMarker;
 pub struct ScanCooldown {
     #[serde(rename = "_id")]
     pub guild_id: Id<GuildMarker>,
-    pub last_scan: u64,
+    pub last_scan: DateTime<Utc>,
 }
