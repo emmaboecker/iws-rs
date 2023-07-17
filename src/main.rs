@@ -1,7 +1,7 @@
 #![allow(clippy::unused_unit)]
 
 use ::mongodb::{options::ClientOptions, Client as MongoClient};
-use commands::VerificationCommands;
+use commands::{IWSCommands, OwnerCommands, SettingsCommands};
 use database::IWSCollections;
 use dotenvy::dotenv;
 use futures::StreamExt;
@@ -24,6 +24,8 @@ mod listeners;
 pub mod checks;
 
 pub mod http_server;
+
+pub mod utils;
 
 #[tokio::main]
 async fn main() -> eyre::Result<()> {
@@ -64,7 +66,9 @@ async fn main() -> eyre::Result<()> {
 
     let framework = Arc::new(
         Framework::builder(client.clone(), app_id, collections.clone())
-            .verification_commands()
+            .iws_commands()
+            .settings_commands()
+            .owner_commands()
             .build(),
     );
 
@@ -116,11 +120,17 @@ async fn handle_events(
             }
         };
 
-        tokio::spawn(process_event(
-            event,
-            http_client.clone(),
-            collections.clone(),
-            framework.clone(),
-        ));
+        let http_client = http_client.clone();
+        let collections = collections.clone();
+        let framework = framework.clone();
+
+        tokio::spawn(async move {
+            let result: Result<(), eyre::ErrReport> =
+                process_event(event, http_client, collections, framework).await;
+
+            if let Err(report) = result {
+                tracing::error!(?report, "failed to process event");
+            }
+        });
     }
 }

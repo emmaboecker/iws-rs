@@ -1,4 +1,4 @@
-use twilight_http::{client::InteractionClient, Client};
+use twilight_http::{client::InteractionClient, request::AuditLogReason, Client};
 use twilight_model::{channel::message::MessageFlags, guild::Permissions};
 use twilight_util::builder::InteractionResponseDataBuilder;
 use zephyrus::twilight_exports::{
@@ -17,6 +17,11 @@ pub async fn interaction_create(
     let data = interaction.data.unwrap();
 
     if let InteractionData::MessageComponent(data) = data {
+        let mut split = data.custom_id.split(':');
+        if split.next() != Some("ban") {
+            return Ok(());
+        }
+
         let member = interaction.member;
 
         if member.is_none() {
@@ -33,13 +38,22 @@ pub async fn interaction_create(
         response_data = if !permissions.contains(Permissions::BAN_MEMBERS) {
             response_data.content("Du kannst keine Mitglieder bannen!")
         } else {
-            let user_id = data.custom_id.split(':').nth(1).unwrap();
+            let user_id = split.next().unwrap();
 
-            http_client
-                .ban(interaction.guild_id.unwrap(), user_id.parse().unwrap())
-                .await?;
+            let create_ban = http_client
+                .create_ban(interaction.guild_id.unwrap(), user_id.parse().unwrap())
+                .reason(&format!(
+                    "Gebannt durch Button von {}",
+                    member.user.unwrap().name
+                ))
+                .unwrap()
+                .await;
 
-            response_data.content(format!("<@!{}> wurde gebannt!", user_id))
+            if let Err(e) = create_ban {
+                response_data.content(format!("User konnte nicht gebannt werden: `{}`", e))
+            } else {
+                response_data.content(format!("<@!{}> wurde gebannt!", user_id))
+            }
         };
 
         interaction_client
@@ -47,7 +61,7 @@ pub async fn interaction_create(
                 interaction.id,
                 &interaction.token,
                 &InteractionResponse {
-                    kind: InteractionResponseType::DeferredChannelMessageWithSource,
+                    kind: InteractionResponseType::ChannelMessageWithSource,
                     data: Some(response_data.build()),
                 },
             )

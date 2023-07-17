@@ -1,7 +1,7 @@
-use std::sync::Arc;
+use std::{str::FromStr, sync::Arc};
 
 use rand::{distributions::Alphanumeric, Rng};
-use twilight_model::channel::message::MessageFlags;
+use twilight_model::{channel::message::MessageFlags, id::Id};
 use twilight_util::builder::InteractionResponseDataBuilder;
 use zephyrus::{
     prelude::{command, DefaultCommandResult, SlashContext},
@@ -16,6 +16,7 @@ use crate::{
 #[command]
 #[description = "Erstellen eines Invite für einen Server (bot owner)"]
 #[checks(owner_command)]
+#[required_permissions(MANAGE_GUILD)]
 pub async fn invite(
     ctx: &SlashContext<Arc<IWSCollections>>,
     #[description = "guild id"] guild_id: String,
@@ -58,7 +59,7 @@ pub async fn create_invite(collections: &IWSCollections, guild_id: &str) -> eyre
         .insert_one(
             Invitation {
                 invite: invite.clone(),
-                guild_id: guild_id.parse().unwrap(),
+                guild_id: Id::from_str(guild_id).unwrap(),
             },
             None,
         )

@@ -12,21 +12,6 @@ use crate::database::IWSCollections;
 
 #[check]
 async fn owner_command(ctx: &SlashContext<Arc<IWSCollections>>) -> Result<bool, DefaultError> {
-    ctx.interaction_client
-        .create_response(
-            ctx.interaction.id,
-            &ctx.interaction.token,
-            &InteractionResponse {
-                kind: InteractionResponseType::DeferredChannelMessageWithSource,
-                data: Some(
-                    InteractionResponseDataBuilder::new()
-                        .flags(MessageFlags::EPHEMERAL)
-                        .build(),
-                ),
-            },
-        )
-        .await?;
-
     let owners = std::env::var("OWNERS")?;
     let support_server = std::env::var("SUPPORT_SERVER")?;
 
@@ -39,19 +24,38 @@ async fn owner_command(ctx: &SlashContext<Arc<IWSCollections>>) -> Result<bool, 
         .as_ref()
         .unwrap();
 
-    let owner_pings = owners
+    let allowed = owners
         .split(',')
-        .map(|owner| format!("<@{}>", owner))
-        .collect::<Vec<_>>()
-        .join(", ");
+        .any(|owner| owner == runner.id.to_string());
 
-    ctx.interaction_client
-        .update_response(&ctx.interaction.token)
-        .content(Some(&format!("Du darfst diesen Command nur als Bot Owner ausführen. Bitte wende dich an {} bzw. joine diesem Server: {}", owner_pings, support_server)))
-        .unwrap()
-        .await?;
+    if !allowed {
+        ctx.interaction_client
+            .create_response(
+                ctx.interaction.id,
+                &ctx.interaction.token,
+                &InteractionResponse {
+                    kind: InteractionResponseType::DeferredChannelMessageWithSource,
+                    data: Some(
+                        InteractionResponseDataBuilder::new()
+                            .flags(MessageFlags::EPHEMERAL)
+                            .build(),
+                    ),
+                },
+            )
+            .await?;
 
-    Ok(owners
-        .split(',')
-        .any(|owner| owner == runner.id.to_string()))
+        let owner_pings = owners
+            .split(',')
+            .map(|owner| format!("<@{}>", owner))
+            .collect::<Vec<_>>()
+            .join(", ");
+
+        ctx.interaction_client
+            .update_response(&ctx.interaction.token)
+            .content(Some(&format!("Du darfst diesen Command nur als Bot Owner ausführen. Bitte wende dich an {} bzw. joine diesem Server: {}", owner_pings, support_server)))
+            .unwrap()
+            .await?;
+    }
+
+    Ok(allowed)
 }

@@ -13,6 +13,7 @@ use crate::{checks::owner_command, database::IWSCollections};
 #[command]
 #[description = "Einen Server entverifizieren (bot owner)"]
 #[checks(owner_command)]
+#[required_permissions(MANAGE_GUILD)]
 pub async fn unverify(
     ctx: &SlashContext<Arc<IWSCollections>>,
     #[description = "guild id"] guild_id: String,
