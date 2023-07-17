@@ -1,7 +1,12 @@
 use std::sync::Arc;
 
 use rand::{distributions::Alphanumeric, Rng};
-use zephyrus::prelude::{command, DefaultCommandResult, SlashContext};
+use twilight_model::channel::message::MessageFlags;
+use twilight_util::builder::InteractionResponseDataBuilder;
+use zephyrus::{
+    prelude::{command, DefaultCommandResult, SlashContext},
+    twilight_exports::{InteractionResponse, InteractionResponseType},
+};
 
 use crate::{
     checks::owner_command,
@@ -9,13 +14,26 @@ use crate::{
 };
 
 #[command]
-#[description = "**Bot Owner only** - Invite erstellen"]
+#[description = "Erstellen eines Invite für einen Server (bot owner)"]
 #[checks(owner_command)]
 pub async fn invite(
     ctx: &SlashContext<Arc<IWSCollections>>,
     #[description = "guild id"] guild_id: String,
 ) -> DefaultCommandResult {
-    ctx.acknowledge().await?;
+    ctx.interaction_client
+        .create_response(
+            ctx.interaction.id,
+            &ctx.interaction.token,
+            &InteractionResponse {
+                kind: InteractionResponseType::DeferredChannelMessageWithSource,
+                data: Some(
+                    InteractionResponseDataBuilder::new()
+                        .flags(MessageFlags::EPHEMERAL)
+                        .build(),
+                ),
+            },
+        )
+        .await?;
 
     let url = create_invite(ctx.data, &guild_id).await?;
 
