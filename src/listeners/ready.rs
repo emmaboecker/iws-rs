@@ -32,21 +32,34 @@ pub async fn ready(ready: Box<Ready>, client: &Client, collections: &IWSCollecti
             .unwrap()
             .is_none()
         {
-            client.leave_guild(guild.id).await.expect(
-                format!(
-                    "Failed to leave guild without verification: {} ({})",
-                    guild.name, guild.id
-                )
-                .as_str(),
-            );
+            let leave_guilds =
+                std::env::var("LEAVE_UNVERIFIED").unwrap_or("false".to_string()) == "true";
 
-            new_guilds.retain(|current| current.id != guild.id);
+            if leave_guilds {
+                client.leave_guild(guild.id).await.expect(
+                    format!(
+                        "Failed to leave guild without verification: {} ({})",
+                        guild.name, guild.id
+                    )
+                    .as_str(),
+                );
 
-            tracing::info!(
-                "Left guild without verification: {} ({})",
-                guild.name,
-                guild.id
-            );
+                new_guilds.retain(|current| current.id != guild.id);
+
+                tracing::info!(
+                    "Left guild without verification: {} ({})",
+                    guild.name,
+                    guild.id
+                );
+            } else {
+                tracing::warn!(
+                    "Bot is on unverified guild but leaving was disabled: {} ({})",
+                    guild.name,
+                    guild.id
+                );
+            }
+        } else {
+            tracing::info!("Checked verified guild: {} ({})", guild.name, guild.id);
         }
     }
 
