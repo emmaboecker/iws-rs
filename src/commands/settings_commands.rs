@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use zephyrus::prelude::FrameworkBuilder;
 
-use crate::database::IWSCollections;
+use crate::BotState;
 
 mod warning_channel;
 use warning_channel::*;
@@ -15,7 +15,7 @@ pub trait SettingsCommands {
     fn settings_commands(self) -> Self;
 }
 
-impl SettingsCommands for FrameworkBuilder<Arc<IWSCollections>> {
+impl SettingsCommands for FrameworkBuilder<Arc<BotState>> {
     fn settings_commands(self) -> Self {
         self.group(|g| {
             g.name("settings")

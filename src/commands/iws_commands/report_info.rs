@@ -8,15 +8,15 @@ use zephyrus::prelude::{command, DefaultCommandResult, SlashContext};
 use zephyrus::twilight_exports::{InteractionResponse, InteractionResponseType};
 
 use crate::checks::only_guilds;
-use crate::database::IWSCollections;
 use crate::utils::report_embed;
+use crate::BotState;
 
 #[command]
 #[description = "Erhalte Informationen über einen gemeldeten User"]
 #[checks(only_guilds)]
 #[required_permissions(MANAGE_GUILD)]
 pub async fn report_info(
-    ctx: &SlashContext<Arc<IWSCollections>>,
+    ctx: &SlashContext<Arc<BotState>>,
     #[description = "Der User über den du die Meldungsinformationen erhalten willst"] user: User,
 ) -> DefaultCommandResult {
     ctx.interaction_client
@@ -36,12 +36,14 @@ pub async fn report_info(
 
     let report = ctx
         .data
+        .collections
         .reported_users
         .find_one(doc! { "_id": user.id.to_string() }, None)
         .await?;
 
     if let Some(report) = report {
-        let embed_builder = report_embed("Report Informationen", "", &report, ctx.http_client(), None).await?;
+        let embed_builder =
+            report_embed("Report Informationen", "", &report, ctx.http_client(), None).await?;
 
         ctx.interaction_client
             .update_response(&ctx.interaction.token)

@@ -4,7 +4,7 @@ use futures::StreamExt;
 use mongodb::bson::doc;
 use zephyrus::prelude::{command, DefaultCommandResult, Modal, SlashContext};
 
-use crate::{checks::owner_command, database::IWSCollections};
+use crate::{checks::owner_command, BotState};
 
 #[derive(Modal, Debug)]
 #[modal(title = "Bot Announcement")]
@@ -17,12 +17,13 @@ struct AnnouncementModal {
 #[description = "Ein Announcement an alle Server senden (bot owner)"]
 #[checks(owner_command)]
 #[required_permissions(MANAGE_GUILD)]
-pub async fn announce(ctx: &SlashContext<Arc<IWSCollections>>) -> DefaultCommandResult {
+pub async fn announce(ctx: &SlashContext<Arc<BotState>>) -> DefaultCommandResult {
     let modal_waiter = ctx.create_modal::<AnnouncementModal>().await?;
     let output = modal_waiter.await?;
 
     let all_set_guilds = ctx
         .data
+        .collections
         .bot_settings
         .find(doc! {}, None)
         .await?

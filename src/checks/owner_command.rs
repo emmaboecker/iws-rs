@@ -8,10 +8,10 @@ use zephyrus::{
     twilight_exports::{InteractionResponse, InteractionResponseType},
 };
 
-use crate::database::IWSCollections;
+use crate::BotState;
 
 #[check]
-async fn owner_command(ctx: &SlashContext<Arc<IWSCollections>>) -> Result<bool, DefaultError> {
+async fn owner_command(ctx: &SlashContext<Arc<BotState>>) -> Result<bool, DefaultError> {
     let owners = std::env::var("OWNERS")?;
     let support_server = std::env::var("SUPPORT_SERVER")?;
 

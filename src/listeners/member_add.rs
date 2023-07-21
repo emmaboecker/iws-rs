@@ -1,6 +1,7 @@
 use mongodb::bson::doc;
 use twilight_http::Client;
-use twilight_model::gateway::payload::incoming::MemberAdd;
+use twilight_model::{channel::message::component::Button, gateway::payload::incoming::MemberAdd};
+use zephyrus::twilight_exports::{ActionRow, Component};
 
 use crate::{database::IWSCollections, utils::report_embed};
 
@@ -57,6 +58,16 @@ pub async fn member_add(
                 .join(", "),
         )?
         .embeds(&[embed])?
+        .components(&[Component::ActionRow(ActionRow {
+            components: vec![Component::Button(Button {
+                custom_id: Some(format!("ban:{}", member_add.user.id)),
+                disabled: false,
+                emoji: None,
+                style: twilight_model::channel::message::component::ButtonStyle::Danger,
+                label: Some("User Bannen".to_string()),
+                url: None,
+            })],
+        })])?
         .await?;
 
     Ok(())

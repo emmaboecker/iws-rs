@@ -11,17 +11,14 @@ use zephyrus::{
     twilight_exports::{ChannelMarker, InteractionResponse, InteractionResponseType},
 };
 
-use crate::{
-    checks::only_guilds,
-    database::{BotSettings, IWSCollections},
-};
+use crate::{checks::only_guilds, database::BotSettings, BotState};
 
 #[command]
 #[description = "Setzt den Kanal in den Warnungen gesendet werden sollen"]
 #[checks(only_guilds)]
 #[required_permissions(MANAGE_GUILD)]
 pub async fn warning_channel(
-    ctx: &SlashContext<Arc<IWSCollections>>,
+    ctx: &SlashContext<Arc<BotState>>,
     #[description = "Der Kanal der als neuer Warnungskanal dienen soll"] channel: Id<ChannelMarker>,
 ) -> DefaultCommandResult {
     ctx.interaction_client
@@ -61,6 +58,7 @@ pub async fn warning_channel(
 
     let existing_settings = ctx
         .data
+        .collections
         .bot_settings
         .find_one(
             doc! { "_id": ctx.interaction.guild_id.as_ref().unwrap().to_string() },
@@ -81,6 +79,7 @@ pub async fn warning_channel(
     settings.log_channel = Some(channel.id);
 
     ctx.data
+        .collections
         .bot_settings
         .find_one_and_replace(
             doc! { "_id": ctx.interaction.guild_id.as_ref().unwrap().to_string() },

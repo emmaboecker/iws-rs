@@ -8,15 +8,16 @@ use zephyrus::prelude::{command, DefaultCommandResult, SlashContext};
 use zephyrus::twilight_exports::{InteractionResponse, InteractionResponseType};
 
 use crate::checks::only_guilds;
-use crate::database::{IWSCollections, ReportedUser};
+use crate::database::ReportedUser;
 use crate::utils::scan_all_guilds;
+use crate::BotState;
 
 #[command]
 #[description = "Einen User melden"]
 #[checks(only_guilds)]
 #[required_permissions(MANAGE_GUILD)]
 pub async fn report(
-    ctx: &SlashContext<Arc<IWSCollections>>,
+    ctx: &SlashContext<Arc<BotState>>,
     #[description = "Der User der gemeldet werden soll"] user: User,
     #[description = "Wofür dieser User gemeldet werden soll"] reason: String,
 ) -> DefaultCommandResult {
@@ -46,6 +47,7 @@ pub async fn report(
 
     let existing_report = ctx
         .data
+        .collections
         .reported_users
         .find_one(doc! { "_id": user.id.to_string() }, None)
         .await?;
@@ -69,6 +71,7 @@ pub async fn report(
         );
 
         ctx.data
+            .collections
             .reported_users
             .update_one(
                 doc! { "_id": user.id.to_string() },
@@ -85,6 +88,7 @@ pub async fn report(
         return Ok(());
     } else {
         ctx.data
+            .collections
             .reported_users
             .insert_one(
                 ReportedUser {
@@ -115,7 +119,7 @@ pub async fn report(
             .await?;
     }
 
-    scan_all_guilds(ctx.http_client(), ctx.data, user.id).await;
+    scan_all_guilds(ctx.http_client(), &ctx.data.collections, user.id).await;
 
     Ok(())
 }

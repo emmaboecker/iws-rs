@@ -5,9 +5,9 @@ use zephyrus::{
     prelude::{check, SlashContext},
 };
 
-use crate::database::IWSCollections;
+use crate::BotState;
 
 #[check]
-async fn only_guilds(ctx: &SlashContext<Arc<IWSCollections>>) -> Result<bool, DefaultError> {
+async fn only_guilds(ctx: &SlashContext<Arc<BotState>>) -> Result<bool, DefaultError> {
     Ok(ctx.interaction.guild_id.is_some())
 }

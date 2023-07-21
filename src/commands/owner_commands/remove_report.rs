@@ -1,7 +1,6 @@
-use std::{str::FromStr, sync::Arc};
-
 use mongodb::bson::doc;
-use twilight_model::{channel::message::MessageFlags, id::Id};
+use std::sync::Arc;
+use twilight_model::{channel::message::MessageFlags, user::User};
 use twilight_util::builder::InteractionResponseDataBuilder;
 use zephyrus::{
     prelude::{command, DefaultCommandResult, SlashContext},
@@ -11,12 +10,12 @@ use zephyrus::{
 use crate::{checks::owner_command, BotState};
 
 #[command]
-#[description = "Einen Server entverifizieren (bot owner)"]
+#[description = "Entfernen einer Meldung eines User (bot owner)"]
 #[checks(owner_command)]
 #[required_permissions(MANAGE_GUILD)]
-pub async fn unverify(
+pub async fn remove_report(
     ctx: &SlashContext<Arc<BotState>>,
-    #[description = "guild id"] guild_id: String,
+    #[description = "Der User, dem die Meldung entfernt werden soll"] user: User,
 ) -> DefaultCommandResult {
     ctx.interaction_client
         .create_response(
@@ -33,38 +32,22 @@ pub async fn unverify(
         )
         .await?;
 
-    let result = ctx
+    let delete_result = ctx
         .data
         .collections
-        .verified_guilds
-        .delete_one(doc! { "_id": guild_id.clone() }, None)
+        .reported_users
+        .delete_one(doc! { "_id": user.id.to_string() }, None)
         .await?;
 
-    if result.deleted_count == 0 {
-        ctx.interaction_client
-            .update_response(&ctx.interaction.token)
-            .content(Some("Dieser Server war nicht verifiziert!"))
-            .unwrap()
-            .await?;
-        return Ok(());
-    }
-
-    let result = ctx
-        .http_client()
-        .leave_guild(Id::from_str(&guild_id).unwrap())
-        .await;
+    let response = if delete_result.deleted_count == 0 {
+        format!("<@{}> war nicht gemeldet!", user.id)
+    } else {
+        format!("<@{}> ist nun nicht mehr gemeldet!", user.id)
+    };
 
     ctx.interaction_client
         .update_response(&ctx.interaction.token)
-        .content(Some(&format!(
-            "Der Server {} wurde entverifiziert! {}",
-            guild_id,
-            if result.is_ok() {
-                "Der Server wurde verlassen"
-            } else {
-                "Der Server konnte aber nicht verlassen werden"
-            }
-        )))
+        .content(Some(&response))
         .unwrap()
         .await?;
 

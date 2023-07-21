@@ -8,14 +8,16 @@ mod unverify;
 pub use unverify::*;
 mod announce;
 pub use announce::*;
+mod remove_report;
+pub use remove_report::*;
 
-use crate::database::IWSCollections;
+use crate::BotState;
 
 pub trait OwnerCommands {
     fn owner_commands(self) -> Self;
 }
 
-impl OwnerCommands for FrameworkBuilder<Arc<IWSCollections>> {
+impl OwnerCommands for FrameworkBuilder<Arc<BotState>> {
     fn owner_commands(self) -> Self {
         self.group(|g| {
             g.name("owner")
@@ -23,6 +25,7 @@ impl OwnerCommands for FrameworkBuilder<Arc<IWSCollections>> {
                 .command(invite)
                 .command(unverify)
                 .command(announce)
+                .command(remove_report)
         })
     }
 }

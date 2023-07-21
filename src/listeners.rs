@@ -4,7 +4,7 @@ use twilight_gateway::Event;
 use twilight_http::Client;
 use zephyrus::prelude::Framework;
 
-use crate::database::IWSCollections;
+use crate::{database::IWSCollections, BotState};
 
 mod interaction_create;
 use interaction_create::*;
@@ -19,7 +19,7 @@ pub async fn process_event(
     event: Event,
     http_client: Arc<Client>,
     collections: Arc<IWSCollections>,
-    framework: Arc<Framework<Arc<IWSCollections>>>,
+    framework: Arc<Framework<Arc<BotState>>>,
 ) -> eyre::Result<()> {
     match event {
         Event::InteractionCreate(interaction_create_event) => {

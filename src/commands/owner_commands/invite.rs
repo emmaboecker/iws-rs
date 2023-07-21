@@ -11,6 +11,7 @@ use zephyrus::{
 use crate::{
     checks::owner_command,
     database::{IWSCollections, Invitation},
+    BotState,
 };
 
 #[command]
@@ -18,7 +19,7 @@ use crate::{
 #[checks(owner_command)]
 #[required_permissions(MANAGE_GUILD)]
 pub async fn invite(
-    ctx: &SlashContext<Arc<IWSCollections>>,
+    ctx: &SlashContext<Arc<BotState>>,
     #[description = "guild id"] guild_id: String,
 ) -> DefaultCommandResult {
     ctx.interaction_client
@@ -36,7 +37,7 @@ pub async fn invite(
         )
         .await?;
 
-    let url = create_invite(ctx.data, &guild_id).await?;
+    let url = create_invite(&ctx.data.collections, &guild_id).await?;
 
     ctx.interaction_client
         .update_response(&ctx.interaction.token)

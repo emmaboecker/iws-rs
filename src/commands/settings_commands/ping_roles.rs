@@ -8,17 +8,14 @@ use zephyrus::{
     twilight_exports::{InteractionResponse, InteractionResponseType},
 };
 
-use crate::{
-    checks::only_guilds,
-    database::{BotSettings, IWSCollections},
-};
+use crate::{checks::only_guilds, database::BotSettings, BotState};
 
 #[command]
 #[description = "Füge eine Rolle hinzu oder entferne sie von den Rollen die gepingt werden sollen bei einer Meldung"]
 #[checks(only_guilds)]
 #[required_permissions(MANAGE_GUILD)]
 pub async fn ping_roles(
-    ctx: &SlashContext<Arc<IWSCollections>>,
+    ctx: &SlashContext<Arc<BotState>>,
     #[description = "Die Rolle die hinzugefügt/entfernt werden soll"] role: Role,
 ) -> DefaultCommandResult {
     ctx.interaction_client
@@ -38,6 +35,7 @@ pub async fn ping_roles(
 
     let existing_settings = ctx
         .data
+        .collections
         .bot_settings
         .find_one(
             doc! { "_id": ctx.interaction.guild_id.as_ref().unwrap().to_string() },
@@ -69,6 +67,7 @@ pub async fn ping_roles(
     };
 
     ctx.data
+        .collections
         .bot_settings
         .find_one_and_replace(
             doc! { "_id": ctx.interaction.guild_id.as_ref().unwrap().to_string() },

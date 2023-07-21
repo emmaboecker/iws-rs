@@ -9,14 +9,15 @@ use zephyrus::prelude::{command, DefaultCommandResult, SlashContext};
 use zephyrus::twilight_exports::ChannelMarker;
 
 use crate::checks::only_guilds;
-use crate::database::{IWSCollections, ScanCooldown};
+use crate::database::ScanCooldown;
+use crate::BotState;
 
 #[command]
 #[description = "Scanne diesen Server nach gemeldeten Usern (24h cooldown)"]
 #[checks(only_guilds)]
 #[required_permissions(MANAGE_GUILD)]
 pub async fn scan(
-    ctx: &SlashContext<Arc<IWSCollections>>,
+    ctx: &SlashContext<Arc<BotState>>,
     #[description = "Der Kanal in den der Report gesendet werden soll, standartmäßig aktueller kanal"]
     channel: Option<Id<ChannelMarker>>,
 ) -> DefaultCommandResult {
@@ -47,6 +48,7 @@ pub async fn scan(
     }
 
     ctx.data
+        .collections
         .scan_cooldown
         .find_one_and_replace(
             doc! { "_id": ctx.interaction.guild_id.unwrap().to_string() },
@@ -77,6 +79,7 @@ pub async fn scan(
 
     let reports = ctx
         .data
+        .collections
         .reported_users
         .find(doc! {}, None)
         .await?

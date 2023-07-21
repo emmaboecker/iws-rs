@@ -8,16 +8,13 @@ use zephyrus::{
     twilight_exports::{InteractionResponse, InteractionResponseType},
 };
 
-use crate::{
-    checks::only_guilds,
-    database::{BotSettings, IWSCollections},
-};
+use crate::{checks::only_guilds, database::BotSettings, BotState};
 
 #[command]
 #[description = "Toggle ob Bans automatisch gemeldet werden sollen"]
 #[checks(only_guilds)]
 #[required_permissions(MANAGE_GUILD)]
-pub async fn auto_report(ctx: &SlashContext<Arc<IWSCollections>>) -> DefaultCommandResult {
+pub async fn auto_report(ctx: &SlashContext<Arc<BotState>>) -> DefaultCommandResult {
     ctx.interaction_client
         .create_response(
             ctx.interaction.id,
@@ -35,6 +32,7 @@ pub async fn auto_report(ctx: &SlashContext<Arc<IWSCollections>>) -> DefaultComm
 
     let existing_settings = ctx
         .data
+        .collections
         .bot_settings
         .find_one(
             doc! { "_id": ctx.interaction.guild_id.as_ref().unwrap().to_string() },
@@ -61,6 +59,7 @@ pub async fn auto_report(ctx: &SlashContext<Arc<IWSCollections>>) -> DefaultComm
     };
 
     ctx.data
+        .collections
         .bot_settings
         .find_one_and_replace(
             doc! { "_id": ctx.interaction.guild_id.as_ref().unwrap().to_string() },

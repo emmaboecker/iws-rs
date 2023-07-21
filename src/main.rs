@@ -27,6 +27,10 @@ pub mod http_server;
 
 pub mod utils;
 
+pub struct BotState {
+    pub collections: IWSCollections,
+}
+
 #[tokio::main]
 async fn main() -> eyre::Result<()> {
     dotenv().ok();
@@ -62,14 +66,18 @@ async fn main() -> eyre::Result<()> {
 
     let stream = ShardEventStream::new(shards.iter_mut());
 
-    let collections = Arc::new(collections);
-
     let framework = Arc::new(
-        Framework::builder(client.clone(), app_id, collections.clone())
-            .iws_commands()
-            .settings_commands()
-            .owner_commands()
-            .build(),
+        Framework::builder(
+            client.clone(),
+            app_id,
+            Arc::new(BotState {
+                collections: collections.clone(),
+            }),
+        )
+        .iws_commands()
+        .settings_commands()
+        .owner_commands()
+        .build(),
     );
 
     if let Ok(test_server) = std::env::var("TEST_SERVER") {
@@ -88,6 +96,8 @@ async fn main() -> eyre::Result<()> {
         framework.register_global_commands().await.unwrap();
     }
 
+    let collections = Arc::new(collections);
+
     {
         let collections = collections.clone();
         tokio::spawn(async move {
@@ -104,7 +114,7 @@ async fn handle_events(
     mut events: ShardEventStream<'_>,
     http_client: Arc<Client>,
     collections: Arc<IWSCollections>,
-    framework: Arc<Framework<Arc<IWSCollections>>>,
+    framework: Arc<Framework<Arc<BotState>>>,
 ) {
     while let Some((_, event)) = events.next().await {
         let event = match event {
