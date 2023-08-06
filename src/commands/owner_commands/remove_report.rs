@@ -7,11 +7,12 @@ use zephyrus::{
     twilight_exports::{InteractionResponse, InteractionResponseType},
 };
 
-use crate::{checks::owner_command, BotState};
+use crate::{checks::owner_command, commands::error::default_command_error_handler, BotState};
 
 #[command]
 #[description = "Entfernen einer Meldung eines User (bot owner)"]
 #[checks(owner_command)]
+#[error_handler(default_command_error_handler)]
 #[required_permissions(MANAGE_GUILD)]
 pub async fn remove_report(
     ctx: &SlashContext<Arc<BotState>>,

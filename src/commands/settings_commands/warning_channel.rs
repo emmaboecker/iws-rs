@@ -11,11 +11,12 @@ use zephyrus::{
     twilight_exports::{ChannelMarker, InteractionResponse, InteractionResponseType},
 };
 
-use crate::{checks::only_guilds, database::BotSettings, BotState};
+use crate::{commands::error::default_command_error_handler, database::BotSettings, BotState};
 
 #[command]
 #[description = "Setzt den Kanal in den Warnungen gesendet werden sollen"]
-#[checks(only_guilds)]
+#[only_guilds]
+#[error_handler(default_command_error_handler)]
 #[required_permissions(MANAGE_GUILD)]
 pub async fn warning_channel(
     ctx: &SlashContext<Arc<BotState>>,

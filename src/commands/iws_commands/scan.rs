@@ -8,20 +8,21 @@ use twilight_util::builder::embed::EmbedBuilder;
 use zephyrus::prelude::{command, DefaultCommandResult, SlashContext};
 use zephyrus::twilight_exports::ChannelMarker;
 
-use crate::checks::only_guilds;
+use crate::commands::error::default_command_error_handler;
 use crate::database::ScanCooldown;
 use crate::BotState;
 
 #[command]
 #[description = "Scanne diesen Server nach gemeldeten Usern (24h cooldown)"]
-#[checks(only_guilds)]
+#[only_guilds]
+#[error_handler(default_command_error_handler)]
 #[required_permissions(MANAGE_GUILD)]
 pub async fn scan(
     ctx: &SlashContext<Arc<BotState>>,
     #[description = "Der Kanal in den der Report gesendet werden soll, standartmäßig aktueller kanal"]
     channel: Option<Id<ChannelMarker>>,
 ) -> DefaultCommandResult {
-    ctx.acknowledge().await?;
+    ctx.defer(false).await?;
 
     let channel = if let Some(channel) = channel {
         ctx.http_client().channel(channel).await?.model().await?

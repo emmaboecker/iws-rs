@@ -36,13 +36,12 @@ pub async fn ready(ready: Box<Ready>, client: &Client, collections: &IWSCollecti
                 std::env::var("LEAVE_UNVERIFIED").unwrap_or("false".to_string()) == "true";
 
             if leave_guilds {
-                client.leave_guild(guild.id).await.expect(
-                    format!(
+                client.leave_guild(guild.id).await.unwrap_or_else(|_| {
+                    panic!(
                         "Failed to leave guild without verification: {} ({})",
                         guild.name, guild.id
                     )
-                    .as_str(),
-                );
+                });
 
                 new_guilds.retain(|current| current.id != guild.id);
 

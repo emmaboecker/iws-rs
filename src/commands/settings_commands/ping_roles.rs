@@ -8,11 +8,12 @@ use zephyrus::{
     twilight_exports::{InteractionResponse, InteractionResponseType},
 };
 
-use crate::{checks::only_guilds, database::BotSettings, BotState};
+use crate::{database::BotSettings, BotState, commands::error::default_command_error_handler};
 
 #[command]
 #[description = "Füge eine Rolle hinzu oder entferne sie von den Rollen die gepingt werden sollen bei einer Meldung"]
-#[checks(only_guilds)]
+#[only_guilds]
+#[error_handler(default_command_error_handler)]
 #[required_permissions(MANAGE_GUILD)]
 pub async fn ping_roles(
     ctx: &SlashContext<Arc<BotState>>,

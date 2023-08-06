@@ -8,11 +8,12 @@ use zephyrus::{
     twilight_exports::{InteractionResponse, InteractionResponseType},
 };
 
-use crate::{checks::owner_command, BotState};
+use crate::{checks::owner_command, commands::error::default_command_error_handler, BotState};
 
 #[command]
 #[description = "Einen Server entverifizieren (bot owner)"]
 #[checks(owner_command)]
+#[error_handler(default_command_error_handler)]
 #[required_permissions(MANAGE_GUILD)]
 pub async fn unverify(
     ctx: &SlashContext<Arc<BotState>>,

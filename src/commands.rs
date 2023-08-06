@@ -4,3 +4,4 @@ mod settings_commands;
 pub use settings_commands::*;
 mod iws_commands;
 pub use iws_commands::*;
+pub mod error;

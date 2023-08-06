@@ -7,14 +7,15 @@ use twilight_util::builder::InteractionResponseDataBuilder;
 use zephyrus::prelude::{command, DefaultCommandResult, SlashContext};
 use zephyrus::twilight_exports::{InteractionResponse, InteractionResponseType};
 
-use crate::checks::only_guilds;
+use crate::commands::error::default_command_error_handler;
 use crate::database::ReportedUser;
 use crate::utils::scan_all_guilds;
 use crate::BotState;
 
 #[command]
 #[description = "Einen User melden"]
-#[checks(only_guilds)]
+#[only_guilds]
+#[error_handler(default_command_error_handler)]
 #[required_permissions(MANAGE_GUILD)]
 pub async fn report(
     ctx: &SlashContext<Arc<BotState>>,

@@ -10,6 +10,7 @@ use zephyrus::{
 
 use crate::{
     checks::owner_command,
+    commands::error::default_command_error_handler,
     database::{IWSCollections, Invitation},
     BotState,
 };
@@ -17,6 +18,7 @@ use crate::{
 #[command]
 #[description = "Erstellen eines Invite für einen Server (bot owner)"]
 #[checks(owner_command)]
+#[error_handler(default_command_error_handler)]
 #[required_permissions(MANAGE_GUILD)]
 pub async fn invite(
     ctx: &SlashContext<Arc<BotState>>,

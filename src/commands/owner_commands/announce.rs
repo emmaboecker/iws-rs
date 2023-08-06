@@ -4,7 +4,7 @@ use futures::StreamExt;
 use mongodb::bson::doc;
 use zephyrus::prelude::{command, DefaultCommandResult, Modal, SlashContext};
 
-use crate::{checks::owner_command, BotState};
+use crate::{checks::owner_command, commands::error::default_command_error_handler, BotState};
 
 #[derive(Modal, Debug)]
 #[modal(title = "Bot Announcement")]
@@ -16,6 +16,7 @@ struct AnnouncementModal {
 #[command]
 #[description = "Ein Announcement an alle Server senden (bot owner)"]
 #[checks(owner_command)]
+#[error_handler(default_command_error_handler)]
 #[required_permissions(MANAGE_GUILD)]
 pub async fn announce(ctx: &SlashContext<Arc<BotState>>) -> DefaultCommandResult {
     let modal_waiter = ctx.create_modal::<AnnouncementModal>().await?;
