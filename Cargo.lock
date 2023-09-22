@@ -2977,12 +2977,13 @@ dependencies = [
 
 [[package]]
 name = "zephyrus"
-version = "0.10.0"
+version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cbec457e5936755b4b37ea73b30004284d17c9a3f25e80feef2fa52e3cf7b526"
+checksum = "70dddf78686a2459f229c832759c16315ca66f0ae17394cef1535f7a30dac48f"
 dependencies = [
  "async-trait",
  "parking_lot",
+ "thiserror",
  "tokio",
  "tracing",
  "twilight-http",
@@ -2993,9 +2994,9 @@ dependencies = [
 
 [[package]]
 name = "zephyrus-macros"
-version = "0.10.0"
+version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b4fadc65d41a173beb5ec0aa8c27c3addcb50f1fe2efa93cd684e53af2fc0239"
+checksum = "58cad02865acfde2368ce15114cb06a9afbd4391a96ac7cff3e02edb8ed0536b"
 dependencies = [
  "darling 0.20.3",
  "proc-macro2",
