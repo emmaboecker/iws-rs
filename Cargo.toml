@@ -18,7 +18,7 @@ twilight-gateway = { version = "0.15", features = [
 ], default-features = false }
 twilight-cache-inmemory = "0.15"
 twilight-util = { version = "0.15", features = ["builder"] }
-zephyrus = "0.10.0"
+zephyrus = "0.11.0"
 
 tokio = { version = "1.29.1", features = ["full"] }
 futures = "0.3.28"

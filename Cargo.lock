@@ -3250,12 +3250,13 @@ dependencies = [
 
 [[package]]
 name = "zephyrus"
-version = "0.10.0"
+version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cbec457e5936755b4b37ea73b30004284d17c9a3f25e80feef2fa52e3cf7b526"
+checksum = "70dddf78686a2459f229c832759c16315ca66f0ae17394cef1535f7a30dac48f"
 dependencies = [
  "async-trait",
  "parking_lot",
+ "thiserror",
  "tokio",
  "tracing",
  "twilight-http",
