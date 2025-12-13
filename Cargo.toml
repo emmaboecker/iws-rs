@@ -16,7 +16,7 @@ twilight-gateway = { version = "0.15", features = [
     "twilight-http",
     "rustls-webpki-roots",
 ], default-features = false }
-twilight-cache-inmemory = "0.15"
+twilight-cache-inmemory = "0.17"
 twilight-util = { version = "0.15", features = ["builder"] }
 zephyrus = "0.10.0"
 
